@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+venv/
+
+# Byte-compiled / optimized / DLL files
+*.egg-info/
+dist/
+build/
+
+# Docker
+*.log
+docker-data/
+
+# --- Terraform ---
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# No ignores el lockfile (se recomienda commitearlo)
+#! .terraform.lock.hcl
