@@ -1,0 +1,60 @@
+name: Deploy to ECS
+
+on:
+  push:
+    branches: [ "main" ]   # Despliega al hacer push a main
+  workflow_dispatch:       # Permite lanzarlo manualmente
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} # ej: stromboly-api
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}       # ej: stromboly-cluster
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}       # ej: stromboly-svc
+  IMAGE_TAG: bootstrap                           # usamos la misma tag que tu task definition
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag and push image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # Ruta completa del repo (cuenta.dkr.ecr.region.amazonaws.com/repo)
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+
+          echo "Building ${IMAGE_URI}"
+          docker build -f docker/Dockerfile -t "${IMAGE_URI}" .
+
+          echo "Pushing ${IMAGE_URI}"
+          docker push "${IMAGE_URI}"
+
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE}" \
+            --force-new-deployment \
+            --region "${AWS_REGION}"
+
+      - name: Wait for service stable
+        run: |
+          aws ecs wait services-stable \
+            --cluster "${ECS_CLUSTER}" \
+            --services "${ECS_SERVICE}" \
+            --region "${AWS_REGION}"
