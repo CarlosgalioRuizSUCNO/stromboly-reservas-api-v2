@@ -17,3 +17,9 @@ app.include_router(rooms_router.router, prefix="/rooms", tags=["rooms"])
 app.include_router(customers_router.router, prefix="/customers", tags=["customers"])
 app.include_router(bookings_router.router, prefix="/bookings", tags=["bookings"])  # <-- NUEVO
 
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    port = int(os.getenv("APP_PORT", "8080"))
+    uvicorn.run("src.app.main:app", host="0.0.0.0", port=port)
