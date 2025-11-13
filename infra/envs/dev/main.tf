@@ -15,7 +15,7 @@ variable "aws_region" {
 
 variable "enable_nat" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "enable_rds" {
@@ -42,6 +42,7 @@ variable "db_name" {
   type    = string
   default = "stromboly"
 }
+
 
 
 module "vpc" {

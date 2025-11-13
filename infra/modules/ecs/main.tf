@@ -1,20 +1,3 @@
-variable "project_name" { type = string }
-variable "vpc_id" { type = string }
-variable "public_subnets" { type = list(string) }
-variable "private_subnets" { type = list(string) }
-variable "repository_url" { type = string }
-variable "image_tag" { type = string }
-variable "cpu" { type = number }
-variable "memory" { type = number }
-variable "desired_count" { type = number }
-variable "log_group_name" { type = string }
-variable "task_role_arn" { type = string }
-variable "exec_role_arn" { type = string }
-variable "secret_arn" { type = string }
-variable "enable_alb" {
-  type    = bool
-  default = false
-}
 
 locals {
   container_name = "${var.project_name}-api"
@@ -86,8 +69,8 @@ resource "aws_lb_target_group" "this" {
   health_check {
     enabled             = true
     healthy_threshold   = 2
-    unhealthy_threshold = 3
-    timeout             = 5
+    unhealthy_threshold = 10
+    timeout             = 10
     interval            = 30
     path                = "/health"
     protocol            = "HTTP"
@@ -133,7 +116,12 @@ resource "aws_ecs_task_definition" "task" {
       }
       secrets = [
         { name = "DB_URL", valueFrom = "${var.secret_arn}:DB_URL::" },
-        { name = "JWT_SECRET", valueFrom = "${var.secret_arn}:JWT_SECRET::" }
+        { name = "JWT_SECRET", valueFrom = "${var.secret_arn}:JWT_SECRET::" },
+        { name = "POSTGRES_USER", valueFrom = "${var.secret_arn}:POSTGRES_USER::" },
+        { name = "POSTGRES_PASSWORD", valueFrom = "${var.secret_arn}:POSTGRES_PASSWORD::" },
+        { name = "POSTGRES_DB", valueFrom = "${var.secret_arn}:POSTGRES_DB::" },
+        { name = "POSTGRES_HOST", valueFrom = "${var.secret_arn}:POSTGRES_HOST::" },
+        { name = "POSTGRES_PORT", valueFrom = "${var.secret_arn}:POSTGRES_PORT::" }
       ]
       environment = [
         { name = "APP_PORT", value = "8080" }
@@ -157,7 +145,7 @@ resource "aws_ecs_service" "svc" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets          = var.public_subnets         
+    subnets          = var.enable_alb ? var.private_subnets : var.public_subnets
     security_groups  = [aws_security_group.ecs.id]
     assign_public_ip = var.enable_alb ? false : true
   }

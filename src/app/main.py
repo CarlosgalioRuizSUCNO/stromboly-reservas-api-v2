@@ -1,13 +1,24 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from src.app.api.v1 import rooms as rooms_router
 from src.app.api.v1 import customers as customers_router
 from src.app.api.v1 import bookings as bookings_router   # <-- NUEVO
+from src.app.db.init_db import init_db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Gestiona el ciclo de vida de la aplicación"""
+    # Startup: Inicializa la base de datos
+    init_db()
+    yield
+    # Shutdown: Aquí se pueden agregar tareas de limpieza si es necesario
 
 app = FastAPI(
     title="Stromboly Reservas API",
     version="0.1.0",
     description="API REST para gestionar reservas del Hotel Stromboly.",
     debug=True,
+    lifespan=lifespan,
 )
 
 @app.get("/health")
