@@ -30,7 +30,7 @@ def create_customer(payload: CustomerCreate, db: Session = Depends(get_db)):
 @router.get("/{customer_id}", response_model=Customer)
 def get_customer(customer_id: int, db: Session = Depends(get_db)):
     """Obtiene un cliente por ID."""
-    customer = db.query(CustomerModel).get(customer_id)
+    customer = db.get(CustomerModel, customer_id)
     if not customer:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
     return customer
@@ -38,7 +38,7 @@ def get_customer(customer_id: int, db: Session = Depends(get_db)):
 @router.put("/{customer_id}", response_model=Customer)
 def update_customer(customer_id: int, payload: CustomerCreate, db: Session = Depends(get_db)):
     """Actualiza los datos de un cliente."""
-    customer = db.query(CustomerModel).get(customer_id)
+    customer = db.get(CustomerModel, customer_id)
     if not customer:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
     customer.name = payload.name
@@ -51,7 +51,7 @@ def update_customer(customer_id: int, payload: CustomerCreate, db: Session = Dep
 @router.delete("/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     """Elimina un cliente."""
-    customer = db.query(CustomerModel).get(customer_id)
+    customer = db.get(CustomerModel, customer_id)
     if not customer:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
     db.delete(customer)

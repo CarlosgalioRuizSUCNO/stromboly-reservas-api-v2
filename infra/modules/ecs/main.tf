@@ -11,6 +11,10 @@ variable "log_group_name" { type = string }
 variable "task_role_arn" { type = string }
 variable "exec_role_arn" { type = string }
 variable "secret_arn" { type = string }
+variable "enable_alb" {
+  type    = bool
+  default = false
+}
 
 locals {
   container_name = "${var.project_name}-api"
@@ -72,11 +76,25 @@ resource "aws_lb" "this" {
 }
 
 resource "aws_lb_target_group" "this" {
-  count    = var.enable_alb ? 1 : 0
-  name     = "${var.project_name}-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  count       = var.enable_alb ? 1 : 0
+  name        = "${var.project_name}-tg"
+  port        = 8080
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+    path                = "/health"
+    protocol            = "HTTP"
+    matcher             = "200"
+  }
+
+  deregistration_delay = 30
 }
 
 resource "aws_lb_listener" "http" {
@@ -109,7 +127,7 @@ resource "aws_ecs_task_definition" "task" {
         logDriver = "awslogs"
         options = {
           awslogs-group         = var.log_group_name
-          awslogs-region        = data.aws_region.current.name
+          awslogs-region        = data.aws_region.current.id
           awslogs-stream-prefix = "ecs"
         }
       }
@@ -148,8 +166,8 @@ resource "aws_ecs_service" "svc" {
     for_each = var.enable_alb ? [1] : []
     content {
       target_group_arn = aws_lb_target_group.this[0].arn
-      container_name   = var.container_name
-      container_port   = var.container_port
+      container_name   = local.container_name
+      container_port   = 8080
     }
   }
 }

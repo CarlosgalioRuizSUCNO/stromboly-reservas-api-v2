@@ -7,6 +7,7 @@ app = FastAPI(
     title="Stromboly Reservas API",
     version="0.1.0",
     description="API REST para gestionar reservas del Hotel Stromboly.",
+    debug=True,
 )
 
 @app.get("/health")

@@ -6,14 +6,15 @@ class BookingBase(BaseModel):
     customer_id: int
     check_in: date
     check_out: date
-    total_price: float
     status: str = "booked"
 
 class BookingCreate(BookingBase):
+    """Schema para crear una reserva. El total_price se calcula automáticamente."""
     pass
 
 class Booking(BookingBase):
     id: int
+    total_price: float
 
     class Config:
-        orm_mode = True
+        from_attributes = True

@@ -1,6 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde archivo .env
+load_dotenv()
 
 # Usa DB_URL si existe (lo inyecta Secrets Manager en AWS)
 DB_URL = os.getenv("DB_URL")

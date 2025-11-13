@@ -25,3 +25,6 @@ crash.*.log
 
 # No ignores el lockfile (se recomienda commitearlo)
 #! .terraform.lock.hcl
+
+.idea
+NUL

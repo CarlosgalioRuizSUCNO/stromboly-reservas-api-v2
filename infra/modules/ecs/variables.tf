@@ -11,5 +11,5 @@ variable "container_name" {
 
 variable "container_port" {
   type    = number
-  default = 80       # Cambia si tu contenedor expone otro puerto (p.ej. 8080)
+  default = 8080     # Puerto del contenedor FastAPI
 }

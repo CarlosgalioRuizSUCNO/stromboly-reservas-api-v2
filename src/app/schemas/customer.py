@@ -15,4 +15,4 @@ class Customer(CustomerBase):
     id: int  # lo agregamos solo cuando ya existe en DB
 
     class Config:
-        orm_mode = True  # permite convertir objetos SQLAlchemy a JSON
+        from_attributes = True  # permite convertir objetos SQLAlchemy a JSON (Pydantic V2)

@@ -65,6 +65,15 @@ module "cloudwatch" {
   project_name = var.project_name
 }
 
+module "secrets" {
+  source       = "../../modules/secrets"
+  project_name = var.project_name
+  db_username  = var.db_username
+  db_password  = var.db_password
+  db_name      = var.db_name
+  rds_endpoint = ""
+}
+
 module "ecs" {
   source          = "../../modules/ecs"
   project_name    = var.project_name
@@ -96,13 +105,4 @@ module "rds" {
   depends_on         = [module.ecs]
 }
 
-module "secrets" {
-  source       = "../../modules/secrets"
-  project_name = var.project_name
-  db_username  = var.db_username
-  db_password  = var.db_password
-  db_name      = var.db_name
-  rds_endpoint = var.enable_rds ? module.rds[0].endpoint : ""
-}
 
-output "alb_dns_name" { value = module.ecs.alb_dns_name }

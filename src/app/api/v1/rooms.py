@@ -32,7 +32,7 @@ def create_room(payload: RoomCreate, db: Session = Depends(get_db)):
 @router.get("/{room_id}", response_model=Room)
 def get_room(room_id: int, db: Session = Depends(get_db)):
     """Obtiene una habitación por ID."""
-    room = db.query(RoomModel).get(room_id)
+    room = db.get(RoomModel, room_id)
     if not room:
         raise HTTPException(status_code=404, detail="Habitación no encontrada")
     return room
@@ -40,7 +40,7 @@ def get_room(room_id: int, db: Session = Depends(get_db)):
 @router.put("/{room_id}", response_model=Room)
 def update_room(room_id: int, payload: RoomCreate, db: Session = Depends(get_db)):
     """Actualiza los datos de una habitación."""
-    room = db.query(RoomModel).get(room_id)
+    room = db.get(RoomModel, room_id)
     if not room:
         raise HTTPException(status_code=404, detail="Habitación no encontrada")
     room.number = payload.number
@@ -55,7 +55,7 @@ def update_room(room_id: int, payload: RoomCreate, db: Session = Depends(get_db)
 @router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_room(room_id: int, db: Session = Depends(get_db)):
     """Elimina una habitación."""
-    room = db.query(RoomModel).get(room_id)
+    room = db.get(RoomModel, room_id)
     if not room:
         raise HTTPException(status_code=404, detail="Habitación no encontrada")
     db.delete(room)
