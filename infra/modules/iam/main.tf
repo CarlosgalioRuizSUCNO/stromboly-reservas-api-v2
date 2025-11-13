@@ -12,6 +12,15 @@ data "aws_iam_policy_document" "execution" {
     resources = ["*"]
     effect    = "Allow"
   }
+
+  # Permisos para acceder a Secrets Manager durante el inicio del contenedor
+  statement {
+    actions = [
+      "secretsmanager:GetSecretValue"
+    ]
+    resources = ["*"]
+    effect    = "Allow"
+  }
 }
 
 resource "aws_iam_role" "task_execution" {

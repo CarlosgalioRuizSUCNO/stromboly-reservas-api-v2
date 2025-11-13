@@ -15,7 +15,7 @@ variable "aws_region" {
 
 variable "enable_nat" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "enable_rds" {
@@ -44,6 +44,7 @@ variable "db_name" {
 }
 
 
+
 module "vpc" {
   source       = "../../modules/vpc"
   project_name = var.project_name
@@ -63,6 +64,15 @@ module "iam" {
 module "cloudwatch" {
   source       = "../../modules/cloudwatch"
   project_name = var.project_name
+}
+
+module "secrets" {
+  source       = "../../modules/secrets"
+  project_name = var.project_name
+  db_username  = var.db_username
+  db_password  = var.db_password
+  db_name      = var.db_name
+  rds_endpoint = ""
 }
 
 module "ecs" {
@@ -96,13 +106,4 @@ module "rds" {
   depends_on         = [module.ecs]
 }
 
-module "secrets" {
-  source       = "../../modules/secrets"
-  project_name = var.project_name
-  db_username  = var.db_username
-  db_password  = var.db_password
-  db_name      = var.db_name
-  rds_endpoint = var.enable_rds ? module.rds[0].endpoint : ""
-}
 
-output "alb_dns_name" { value = module.ecs.alb_dns_name }

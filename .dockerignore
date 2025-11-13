@@ -1,0 +1,6 @@
+docker
+.github
+infra
+.venv
+docker-compose.yml
+var.private_subnets
