@@ -2,15 +2,15 @@ name: Deploy to ECS
 
 on:
   push:
-    branches: [ "main" ]   # Despliega al hacer push a main
-  workflow_dispatch:       # Permite lanzarlo manualmente
+    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} # ej: stromboly-api
-  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}       # ej: stromboly-cluster
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}       # ej: stromboly-svc
-  IMAGE_TAG: latest                           # usamos la misma tag que tu task definition
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  IMAGE_TAG: latest
 
 jobs:
   deploy:
@@ -35,67 +35,18 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          # Ruta completa del repo (cuenta.dkr.ecr.region.amazonaws.com/repo)
           IMAGE_URI="${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
-
-          echo "Building ${IMAGE_URI}"
           docker build -f docker/Dockerfile -t "${IMAGE_URI}" .
-
-          echo "Pushing ${IMAGE_URI}"
           docker push "${IMAGE_URI}"
-      
-      - name: Tag ECR image as latest (server-side)
-        shell: bash
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
-        run: |
-          set -euo pipefail
-          REPO="${ECR_REPOSITORY}"
-          SRC_TAG="latest"
-          DST_TAG="latest"
 
-          echo "📦 Obteniendo manifest de ${REPO}:${SRC_TAG}..."
-          MANIFEST=$(aws ecr batch-get-image \
-            --repository-name "${REPO}" \
-            --image-ids imageTag="${SRC_TAG}" \
-            --region "${AWS_REGION}" \
-            --query 'images[0].imageManifest' \
-            --output text)
-
-          if [[ -z "${MANIFEST}" || "${MANIFEST}" == "None" ]]; then
-            echo "❌ ERROR: No se encontró la imagen ${REPO}:${SRC_TAG} en ECR."
-            exit 1
-          fi
-
-          echo "🪄 Publicando manifest como ${REPO}:${DST_TAG}..."
-          aws ecr put-image \
-            --repository-name "${REPO}" \
-            --image-tag "${DST_TAG}" \
-            --image-manifest "${MANIFEST}" \
-            --region "${AWS_REGION}"
-
-          echo "✅ Imagen ${REPO}:${DST_TAG} creada exitosamente en ECR."
-
-      - name: Force new ECS deployment
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
-          ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ env.ECS_SERVICE }}
+      - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster "${ECS_CLUSTER}" \
-            --service "${ECS_SERVICE}" \
+            --cluster "${{ env.ECS_CLUSTER }}" \
+            --service "${{ env.ECS_SERVICE }}" \
             --force-new-deployment \
-            --region "${AWS_REGION}"
-
-      - name: Wait for service stable
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
-          ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
-          ECS_SERVICE: ${{ env.ECS_SERVICE }}
-        run: |
-          aws ecs wait services-stable \
-            --cluster "${ECS_CLUSTER}" \
-            --services "${ECS_SERVICE}" \
-            --region "${AWS_REGION}"
+            --region "${{ env.AWS_REGION }}" \
+          && aws ecs wait services-stable \
+            --cluster "${{ env.ECS_CLUSTER }}" \
+            --services "${{ env.ECS_SERVICE }}" \
+            --region "${{ env.AWS_REGION }}"
