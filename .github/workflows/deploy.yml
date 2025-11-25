@@ -40,25 +40,13 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          echo "=== Build and Push Configuration ==="
-          echo "ECR Registry: ${ECR_REGISTRY}"
-          echo "ECR Repository (original): ${{ env.ECR_REPOSITORY }}"
-          echo "Image Tag: ${{ env.IMAGE_TAG }}"
-          
-          # Convert repository name to lowercase (required by Docker/ECR)
           REPO_NAME=$(echo "${{ env.ECR_REPOSITORY }}" | tr '[:upper:]' '[:lower:]')
-          echo "ECR Repository (lowercase): ${REPO_NAME}"
-          
           IMAGE_URI="${ECR_REGISTRY}/${REPO_NAME}:${{ env.IMAGE_TAG }}"
-          echo "Full Image URI: ${IMAGE_URI}"
           
-          echo "=== Building Docker Image ==="
+          cp docker/Dockerfile src/app/Dockerfile
+          cd src/app 
           docker build -f docker/Dockerfile -t "${IMAGE_URI}" .
-          
-          echo "=== Pushing Image to ECR ==="
           docker push "${IMAGE_URI}"
-          
-          echo "=== Push completed successfully ==="
 
       - name: Deploy to ECS
         run: |
