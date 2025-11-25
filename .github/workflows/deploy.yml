@@ -35,7 +35,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          IMAGE_URI="${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+          REPO_NAME=$(echo "${{ env.ECR_REPOSITORY }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE_URI="${ECR_REGISTRY}/${REPO_NAME}:${{ env.IMAGE_TAG }}"
           docker build -f docker/Dockerfile -t "${IMAGE_URI}" .
           docker push "${IMAGE_URI}"
 
