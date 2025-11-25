@@ -8,7 +8,9 @@ variable "rds_endpoint" {
 }
 
 locals {
-  db_url = var.rds_endpoint != "" ? "postgresql://${var.db_username}:${var.db_password}@${var.rds_endpoint}/${var.db_name}" : ""
+  db_host = var.rds_endpoint != "" ? split(":", var.rds_endpoint)[0] : ""
+  db_port = var.rds_endpoint != "" ? (length(split(":", var.rds_endpoint)) > 1 ? split(":", var.rds_endpoint)[1] : "5432") : "5432"
+  db_url  = var.rds_endpoint != "" ? "postgresql://${var.db_username}:${var.db_password}@${var.rds_endpoint}/${var.db_name}" : ""
 }
 
 resource "aws_secretsmanager_secret" "app" {
@@ -18,8 +20,13 @@ resource "aws_secretsmanager_secret" "app" {
 resource "aws_secretsmanager_secret_version" "app" {
   secret_id = aws_secretsmanager_secret.app.id
   secret_string = jsonencode({
-    DB_URL     = local.db_url
-    JWT_SECRET = "changeme-in-prod"
+    DB_URL            = local.db_url
+    JWT_SECRET        = "changeme-in-prod"
+    POSTGRES_USER     = var.db_username
+    POSTGRES_PASSWORD = var.db_password
+    POSTGRES_DB       = var.db_name
+    POSTGRES_HOST     = local.db_host
+    POSTGRES_PORT     = local.db_port
   })
 }
 
