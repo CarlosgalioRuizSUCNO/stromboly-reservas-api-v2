@@ -34,11 +34,9 @@ jobs:
       - name: Build, tag and push image to ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
           # Ruta completa del repo (cuenta.dkr.ecr.region.amazonaws.com/repo)
-          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY,,}:${IMAGE_TAG}"
+          IMAGE_URI="${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
 
           echo "Building ${IMAGE_URI}"
           docker build -f docker/Dockerfile -t "${IMAGE_URI}" .
