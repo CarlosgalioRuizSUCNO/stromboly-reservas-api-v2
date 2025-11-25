@@ -6,10 +6,15 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+#  AWS_REGION: ${{ secrets.AWS_REGION }}
+#  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+#  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
+#  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+#  IMAGE_TAG: latest
+  AWS_REGION: "us-east-1"
+  ECR_REPOSITORY: "stromboly-api"
+  ECS_CLUSTER: "stromboly-cluster"
+  ECS_SERVICE: "stromboly-svc"
   IMAGE_TAG: latest
 
 jobs:
