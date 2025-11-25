@@ -1,6 +1,6 @@
 variable "project_name" {
   type    = string
-  default = "galicos"
+  default = "stromboly"
 }
 
 variable "aws_region" {
@@ -40,15 +40,15 @@ variable "memory" {
 
 variable "db_username" {
   type    = string
-  default = "galicos"
+  default = "stromboly"
 }
 
 variable "db_password" {
   type    = string
-  default = "galicospass"
+  default = "strombolypass"
 }
 
 variable "db_name" {
   type    = string
-  default = "galicos"
+  default = "stromboly"
 }
