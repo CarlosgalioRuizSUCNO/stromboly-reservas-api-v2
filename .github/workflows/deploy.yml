@@ -36,7 +36,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           # Ruta completa del repo (cuenta.dkr.ecr.region.amazonaws.com/repo)
-          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY,,}:${IMAGE_TAG}"
 
           echo "Building ${IMAGE_URI}"
           docker build -f docker/Dockerfile -t "${IMAGE_URI}" .
