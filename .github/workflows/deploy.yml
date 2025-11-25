@@ -10,7 +10,7 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }} # ej: stromboly-api
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}       # ej: stromboly-cluster
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}       # ej: stromboly-svc
-  IMAGE_TAG: bootstrap                           # usamos la misma tag que tu task definition
+  IMAGE_TAG: latest                           # usamos la misma tag que tu task definition
 
 jobs:
   deploy:
@@ -51,7 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           REPO="stromboly-api"
-          SRC_TAG="bootstrap"
+          SRC_TAG="latest"
           DST_TAG="latest"
 
           echo "📦 Obteniendo manifest de ${REPO}:${SRC_TAG}..."
