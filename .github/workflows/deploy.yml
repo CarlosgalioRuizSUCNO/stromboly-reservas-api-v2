@@ -37,10 +37,14 @@ jobs:
         run: |
           echo "=== Build and Push Configuration ==="
           echo "ECR Registry: ${ECR_REGISTRY}"
-          echo "ECR Repository: ${{ env.ECR_REPOSITORY }}"
+          echo "ECR Repository (original): ${{ env.ECR_REPOSITORY }}"
           echo "Image Tag: ${{ env.IMAGE_TAG }}"
           
-          IMAGE_URI="${ECR_REGISTRY}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+          # Convert repository name to lowercase (required by Docker/ECR)
+          REPO_NAME=$(echo "${{ env.ECR_REPOSITORY }}" | tr '[:upper:]' '[:lower:]')
+          echo "ECR Repository (lowercase): ${REPO_NAME}"
+          
+          IMAGE_URI="${ECR_REGISTRY}/${REPO_NAME}:${{ env.IMAGE_TAG }}"
           echo "Full Image URI: ${IMAGE_URI}"
           
           echo "=== Building Docker Image ==="
