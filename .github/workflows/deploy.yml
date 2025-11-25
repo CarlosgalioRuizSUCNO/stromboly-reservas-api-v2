@@ -34,6 +34,8 @@ jobs:
       - name: Build, tag and push image to ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
         run: |
           # Ruta completa del repo (cuenta.dkr.ecr.region.amazonaws.com/repo)
           IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY,,}:${IMAGE_TAG}"
@@ -48,9 +50,10 @@ jobs:
         shell: bash
         env:
           AWS_REGION: ${{ env.AWS_REGION }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
           set -euo pipefail
-          REPO="stromboly-api"
+          REPO="${ECR_REPOSITORY}"
           SRC_TAG="latest"
           DST_TAG="latest"
 
@@ -77,6 +80,10 @@ jobs:
           echo "✅ Imagen ${REPO}:${DST_TAG} creada exitosamente en ECR."
 
       - name: Force new ECS deployment
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ env.ECS_SERVICE }}
         run: |
           aws ecs update-service \
             --cluster "${ECS_CLUSTER}" \
@@ -85,6 +92,10 @@ jobs:
             --region "${AWS_REGION}"
 
       - name: Wait for service stable
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECS_CLUSTER: ${{ env.ECS_CLUSTER }}
+          ECS_SERVICE: ${{ env.ECS_SERVICE }}
         run: |
           aws ecs wait services-stable \
             --cluster "${ECS_CLUSTER}" \
