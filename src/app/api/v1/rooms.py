@@ -6,10 +6,12 @@ from src.app.schemas.room import Room, RoomCreate
 
 router = APIRouter()
 
+
 @router.get("/", response_model=list[Room])
 def list_rooms(db: Session = Depends(get_db)):
     """Obtiene todas las habitaciones registradas."""
     return db.query(RoomModel).all()
+
 
 @router.post("/", response_model=Room, status_code=status.HTTP_201_CREATED)
 def create_room(payload: RoomCreate, db: Session = Depends(get_db)):
@@ -29,6 +31,7 @@ def create_room(payload: RoomCreate, db: Session = Depends(get_db)):
     db.refresh(room)
     return room
 
+
 @router.get("/{room_id}", response_model=Room)
 def get_room(room_id: int, db: Session = Depends(get_db)):
     """Obtiene una habitación por ID."""
@@ -36,6 +39,7 @@ def get_room(room_id: int, db: Session = Depends(get_db)):
     if not room:
         raise HTTPException(status_code=404, detail="Habitación no encontrada")
     return room
+
 
 @router.put("/{room_id}", response_model=Room)
 def update_room(room_id: int, payload: RoomCreate, db: Session = Depends(get_db)):
@@ -51,6 +55,7 @@ def update_room(room_id: int, payload: RoomCreate, db: Session = Depends(get_db)
     db.commit()
     db.refresh(room)
     return room
+
 
 @router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_room(room_id: int, db: Session = Depends(get_db)):

@@ -6,10 +6,12 @@ from src.app.schemas.customer import Customer, CustomerCreate
 
 router = APIRouter()
 
+
 @router.get("/", response_model=list[Customer])
 def list_customers(db: Session = Depends(get_db)):
     """Obtiene todos los clientes registrados."""
     return db.query(CustomerModel).all()
+
 
 @router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED)
 def create_customer(payload: CustomerCreate, db: Session = Depends(get_db)):
@@ -27,6 +29,7 @@ def create_customer(payload: CustomerCreate, db: Session = Depends(get_db)):
     db.refresh(customer)
     return customer
 
+
 @router.get("/{customer_id}", response_model=Customer)
 def get_customer(customer_id: int, db: Session = Depends(get_db)):
     """Obtiene un cliente por ID."""
@@ -34,6 +37,7 @@ def get_customer(customer_id: int, db: Session = Depends(get_db)):
     if not customer:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
     return customer
+
 
 @router.put("/{customer_id}", response_model=Customer)
 def update_customer(customer_id: int, payload: CustomerCreate, db: Session = Depends(get_db)):
@@ -47,6 +51,7 @@ def update_customer(customer_id: int, payload: CustomerCreate, db: Session = Dep
     db.commit()
     db.refresh(customer)
     return customer
+
 
 @router.delete("/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_customer(customer_id: int, db: Session = Depends(get_db)):

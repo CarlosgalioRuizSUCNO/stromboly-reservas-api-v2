@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from src.app.api.v1 import rooms as rooms_router
 from src.app.api.v1 import customers as customers_router
-from src.app.api.v1 import bookings as bookings_router   # <-- NUEVO
+from src.app.api.v1 import bookings as bookings_router  # <-- NUEVO
 from src.app.db.init_db import init_db
 from fastapi.middleware.cors import CORSMiddleware
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,6 +15,7 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown: Aquí se pueden agregar tareas de limpieza si es necesario
 
+
 app = FastAPI(
     title="Stromboly Reservas API",
     version="0.1.0",
@@ -22,16 +24,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # or ["*"] for all
+    allow_origins=["*"],  # or ["*"] for all
     allow_credentials=True,
-    allow_methods=["*"],            # GET, POST, PUT, DELETE, OPTIONS…
-    allow_headers=["*"],            # Authorization, Content-Type...
+    allow_methods=["*"],  # GET, POST, PUT, DELETE, OPTIONS…
+    allow_headers=["*"],  # Authorization, Content-Type...
 )
 app.include_router(rooms_router.router, prefix="/rooms", tags=["rooms"])
 app.include_router(customers_router.router, prefix="/customers", tags=["customers"])

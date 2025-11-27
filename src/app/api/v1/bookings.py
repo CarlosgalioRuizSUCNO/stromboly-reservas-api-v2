@@ -11,6 +11,7 @@ from src.app.schemas.booking import Booking, BookingCreate
 
 router = APIRouter()
 
+
 def _validate_dates(check_in: date, check_out: date):
     if check_in >= check_out:
         raise HTTPException(status_code=400, detail="check_in debe ser menor a check_out")
@@ -18,17 +19,19 @@ def _validate_dates(check_in: date, check_out: date):
         # límite sanitario para evitar reservas absurdamente largas (opcional)
         raise HTTPException(status_code=400, detail="Reserva excede el límite de noches permitido")
 
+
 def _overlap_filter(check_in: date, check_out: date):
     """Hay solape si: (A.start < B.end) y (B.start < A.end)"""
     return and_(BookingModel.check_in < check_out,
                 check_in < BookingModel.check_out)
 
+
 @router.get("/", response_model=list[Booking])
 def list_bookings(
-    db: Session = Depends(get_db),
-    room_id: int | None = Query(default=None),
-    customer_id: int | None = Query(default=None),
-    status_filter: str | None = Query(default=None, description="booked|checked_in|completed|cancelled"),
+        db: Session = Depends(get_db),
+        room_id: int | None = Query(default=None),
+        customer_id: int | None = Query(default=None),
+        status_filter: str | None = Query(default=None, description="booked|checked_in|completed|cancelled"),
 ):
     q = db.query(BookingModel)
     if room_id is not None:
@@ -39,12 +42,14 @@ def list_bookings(
         q = q.filter(BookingModel.status == status_filter)
     return q.order_by(BookingModel.id.desc()).all()
 
+
 @router.get("/{booking_id}", response_model=Booking)
 def get_booking(booking_id: int, db: Session = Depends(get_db)):
     bk = db.get(BookingModel, booking_id)
     if not bk:
         raise HTTPException(status_code=404, detail="Reserva no encontrada")
     return bk
+
 
 @router.post("/", response_model=Booking, status_code=status.HTTP_201_CREATED)
 def create_booking(payload: BookingCreate, db: Session = Depends(get_db)):
@@ -69,12 +74,12 @@ def create_booking(payload: BookingCreate, db: Session = Depends(get_db)):
     active_status = ("booked", "checked_in", "completed")
     overlap = (
         db.query(BookingModel)
-          .filter(
-              BookingModel.room_id == payload.room_id,
-              BookingModel.status.in_(active_status),
-              _overlap_filter(payload.check_in, payload.check_out),
-          )
-          .first()
+        .filter(
+            BookingModel.room_id == payload.room_id,
+            BookingModel.status.in_(active_status),
+            _overlap_filter(payload.check_in, payload.check_out),
+        )
+        .first()
     )
     if overlap:
         raise HTTPException(status_code=409, detail="La habitación ya está reservada en esas fechas")
@@ -98,6 +103,7 @@ def create_booking(payload: BookingCreate, db: Session = Depends(get_db)):
     db.refresh(bk)
     return bk
 
+
 @router.patch("/{booking_id}/status", response_model=Booking)
 def update_status(booking_id: int, status_value: str, db: Session = Depends(get_db)):
     """
@@ -116,6 +122,7 @@ def update_status(booking_id: int, status_value: str, db: Session = Depends(get_
     db.commit()
     db.refresh(bk)
     return bk
+
 
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_booking(booking_id: int, db: Session = Depends(get_db)):

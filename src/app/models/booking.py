@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, ForeignKey, Date, Float, String
 from sqlalchemy.orm import relationship
 from src.app.db.session import Base
 
+
 class Booking(Base):
     __tablename__ = "bookings"
 

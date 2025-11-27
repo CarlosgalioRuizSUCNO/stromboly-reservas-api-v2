@@ -4,6 +4,7 @@ Ejecuta este archivo antes de iniciar la aplicación por primera vez.
 """
 from src.app.db.session import Base, engine
 
+
 def init_db():
     """Crea todas las tablas definidas en los modelos"""
     # Importar todos los modelos aquí para que SQLAlchemy los registre
@@ -18,6 +19,6 @@ def init_db():
     print("  - customers")
     print("  - bookings")
 
+
 if __name__ == "__main__":
     init_db()
-

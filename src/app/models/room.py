@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float
 from src.app.db.session import Base
 
+
 class Room(Base):
     __tablename__ = "rooms"
 
