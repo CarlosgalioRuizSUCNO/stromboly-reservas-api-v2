@@ -11,7 +11,7 @@ DB_URL = os.getenv("DB_URL")
 if not DB_URL:
     DB_USER = os.getenv("POSTGRES_USER", "stromboly")
     DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "strombolypass")
-    DB_HOST = os.getenv("POSTGRES_HOST", "postgres")
+    DB_HOST = os.getenv("DB_HOST", "localhost")
     DB_PORT = os.getenv("POSTGRES_PORT", "5432")
     DB_NAME = os.getenv("POSTGRES_DB", "stromboly")
     DB_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

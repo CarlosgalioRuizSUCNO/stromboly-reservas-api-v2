@@ -4,6 +4,7 @@ from src.app.api.v1 import rooms as rooms_router
 from src.app.api.v1 import customers as customers_router
 from src.app.api.v1 import bookings as bookings_router   # <-- NUEVO
 from src.app.db.init_db import init_db
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,6 +26,13 @@ app = FastAPI(
 def health():
     return {"status": "ok"}
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],          # or ["*"] for all
+    allow_credentials=True,
+    allow_methods=["*"],            # GET, POST, PUT, DELETE, OPTIONS…
+    allow_headers=["*"],            # Authorization, Content-Type...
+)
 app.include_router(rooms_router.router, prefix="/rooms", tags=["rooms"])
 app.include_router(customers_router.router, prefix="/customers", tags=["customers"])
 app.include_router(bookings_router.router, prefix="/bookings", tags=["bookings"])  # <-- NUEVO
